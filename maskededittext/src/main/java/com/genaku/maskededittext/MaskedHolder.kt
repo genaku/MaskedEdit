@@ -1,15 +1,11 @@
 package com.genaku.maskededittext
 
-import com.genaku.maskededittext.Utils.Companion.min
-import com.genaku.maskededittext.maskcharacters.FixedCharacter
+import org.mym.plog.PLog
 
-class MaskedHolder(private val fmtString: String) {
+class MaskedHolder(fmtString: String) {
 
     private var formatter = MaskedFormatter(fmtString)
     private var mask: Mask = Mask(fmtString)
-
-    fun getFmtMask() =
-        fmtString
 
     var unmasked = ""
 
@@ -18,6 +14,10 @@ class MaskedHolder(private val fmtString: String) {
 
     fun getPosition(index: Int, isDeletion: Boolean) =
         mask.getNextPosition(index, isDeletion)
+
+    fun getLastInputPosition(): Int {
+        return formatted.length
+    }
 
     fun setMask(fmtString: String) {
         mask = Mask(fmtString)
@@ -33,9 +33,15 @@ class MaskedHolder(private val fmtString: String) {
     }
 
     fun replaceChars(start: Int, end: Int, chars: CharSequence) {
+        PLog.d("replace chars [$start-$end] {$chars}")
         if (start > end || end < 0) {
             return
         }
+
+        if (!mask.isEmpty && start >= mask.lastAllowedPos) {
+            return
+        }
+
         val unmaskedLen = unmasked.length
         if (start == unmaskedLen) {
             unmasked = unmasked.plus(chars)
@@ -53,15 +59,16 @@ class MaskedHolder(private val fmtString: String) {
     }
 
     fun deleteChars(input: String, start: Int, end: Int) {
-        val unmaskedStart = mask.convertPos(input, start, true)
-        val unmaskedEnd = mask.convertPos(input, end, true)
+        val trimmed = input.substring(0, getLastInputPosition())
+        val unmaskedStart = mask.convertPos(trimmed, start, true)
+        val unmaskedEnd = mask.convertPos(trimmed, end, true)
         deleteChars(unmaskedStart, unmaskedEnd)
     }
 
     fun replaceChars(input: String, start: Int, end: Int, chars: CharSequence) {
-        val unmaskedStart = mask.convertPos(input, start)
-        val unmaskedEnd = mask.convertPos(input, end)
+        val trimmed = input.substring(0, getLastInputPosition())
+        val unmaskedStart = mask.convertPos(trimmed, start)
+        val unmaskedEnd = mask.convertPos(trimmed, end)
         replaceChars(unmaskedStart, unmaskedEnd, chars)
     }
-
 }

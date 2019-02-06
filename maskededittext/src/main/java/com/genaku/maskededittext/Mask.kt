@@ -4,27 +4,29 @@ import com.genaku.maskededittext.Utils.Companion.min
 import com.genaku.maskededittext.maskcharacters.FixedCharacter
 import com.genaku.maskededittext.maskcharacters.MaskCharacter
 import com.genaku.maskededittext.maskcharacters.MaskCharacterFabric
+import org.mym.plog.PLog
+import java.lang.StringBuilder
 import java.util.ArrayList
 
-class Mask() {
+class Mask(val formatString: String) {
 
-    private var maskChars: List<MaskCharacter> = emptyList()
-    private val fabric: MaskCharacterFabric =
-        MaskCharacterFabric()
+    private val fabric = MaskCharacterFabric()
+    private var maskChars: List<MaskCharacter> = buildMask(formatString)
 
-    var formatString: String = ""
     val validCursorPositions = ArrayList<Int>()
     private var firstAllowedPosition: Int = 0
     private var lastAllowedPosition: Int = 0
 
-    constructor(fmtString: String) : this() {
-        formatString = fmtString
-        maskChars = buildMask(formatString)
+    init {
         initValidCursorPositions(maskChars)
     }
 
-    val size
-        get() = maskChars.size
+    val size = maskChars.size
+
+    val isEmpty = (size == 0)
+
+    val lastAllowedPos
+        get() = validCursorPositions.size - 1
 
     operator fun get(index: Int): MaskCharacter = maskChars[index]
 
@@ -53,6 +55,8 @@ class Mask() {
                 validCursorPositions.add(i)
             }
         }
+        validCursorPositions.add(mask.size)
+        PLog.d("valid size ${validCursorPositions.size}")
         if (mask.isEmpty()) {
             firstAllowedPosition = 0
             lastAllowedPosition = 0
@@ -70,9 +74,13 @@ class Mask() {
             val i = validCursorPositions.indexOf(pos)
             val iterator = validCursorPositions.listIterator(i)
             if (isDeletion) {
-                if (iterator.hasPrevious()) {
-                    return iterator.previous() + 1
-                }
+                return iterator.next()
+//                if (iterator.hasPrevious()) {
+//                    iterator.previous()
+//                    if (iterator.hasNext()) {
+//                        return iterator.next()
+//                    }
+//                }
             } else {
                 if (iterator.hasNext()) {
                     val newPos = iterator.next()
@@ -112,13 +120,16 @@ class Mask() {
         }
     }
 
-    fun convertPos(str: String, pos: Int, deletion: Boolean = false): Int {
+    fun convertPos(input: String, pos: Int, deletion: Boolean = false): Int {
         if (pos < firstAllowedPosition) {
             return 0
         }
 
+        val str = trimInputStr(input)
+
         val lastStrPos = str.length - 1
         val inputLen = min(size, pos, lastStrPos)
+
         var result = -1
         for (i in 0..inputLen) {
             val strChar = str[i]
@@ -128,13 +139,28 @@ class Mask() {
             }
             if (i == lastStrPos) {
                 if (deletion) {
-                    result--
+                    if (pos > lastStrPos) {
+                        result++
+                    }
                 } else {
                     result++
                 }
             }
         }
         return result
+    }
+
+    private fun trimInputStr(str: String): String {
+        val strBuilder = StringBuilder()
+        val lastPos = min(str.length, maskChars.size) - 1
+        for (i in lastPos downTo 0) {
+            val maskChar = maskChars[i]
+            val strChar = str[i]
+            if (strChar != maskChar.viewChar || maskChar is FixedCharacter) {
+                strBuilder.append(strChar)
+            }
+        }
+        return strBuilder.toString().reversed()
     }
 
 }

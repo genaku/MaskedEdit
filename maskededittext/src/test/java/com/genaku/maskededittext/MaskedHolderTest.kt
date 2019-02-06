@@ -11,7 +11,7 @@ class MaskedHolderTest {
 
     @Test
     fun test() = uspek {
-        "holder" o {
+        "holder without mask" o {
             val holder = MaskedHolder("")
             val initialText = "012345"
             "insert" o {
@@ -115,7 +115,7 @@ class MaskedHolderTest {
                 raw.substring(1, 2) eqq "0"
             }
             "get last input pos" o {
-                mask.convertPos(input, 7) eqq 3
+                mask.convertPos(input, 7) eqq 4
                 raw.substring(3, 4) eqq "6"
             }
             "get last input pos after fixed char" o {
@@ -126,6 +126,15 @@ class MaskedHolderTest {
             }
             "get first pos from 1" o {
                 mask.convertPos("+7(123)", 1) eqq 0
+            }
+            "get last pos on delete" o {
+                mask.convertPos("+7(44", 4, true) eqq 1
+            }
+            "get last pos on delete 1" o {
+                mask.convertPos("+7(44", 5, true) eqq 2
+            }
+            "get last pos on delete 2" o {
+                mask.convertPos("+7(902)6##", 8, true) eqq 4
             }
         }
         "delete in masked" o {
@@ -144,6 +153,12 @@ class MaskedHolderTest {
                 holder.unmasked eqq "026"
                 holder.formatted eqq "+7(026)"
             }
+            "delete last char" o {
+                holder.unmasked = "44"
+                holder.deleteChars("+7(44", 4, 5)
+                holder.unmasked eqq "4"
+                holder.formatted eqq "+7(4"
+            }
             "delete last input digit" o {
                 holder.deleteChars(input, 7, 8)
                 holder.unmasked eqq "902"
@@ -158,6 +173,18 @@ class MaskedHolderTest {
                 holder.deleteChars(input, 20, 21)
                 holder.unmasked eqq raw
                 holder.formatted eqq formatted
+            }
+        }
+        "delete in other mask" o {
+            val holder = MaskedHolder("+7(###) ###-##-##")
+            holder.unmasked = "1234567890"
+            "delete char at the end" o {
+                holder.deleteChars("+7(123) 456-78-90", 16, 17)
+                holder.unmasked eqq "123456789"
+            }
+            "delete char at the end 1" o {
+                holder.deleteChars("+7(123) 456-78-90", 15, 16)
+                holder.unmasked eqq "123456780"
             }
         }
         "replace in masked" o {
@@ -249,10 +276,10 @@ class MaskedHolderTest {
 
     @Test
     fun testMask() = uspek {
-        "valid cursor positions" o {
+        "cursor positions" o {
             val mask = Mask(TEST_MASK)
             "list of positions" o {
-                mask.validCursorPositions eqq listOf(3, 4, 5, 7, 8, 9)
+                mask.validCursorPositions eqq listOf(3, 4, 5, 7, 8, 9, 10)
             }
             "find first pos" o {
                 val pos = mask.getNextPosition(0, false)
@@ -276,7 +303,7 @@ class MaskedHolderTest {
             }
             "find pos on deletion 1" o {
                 val pos = mask.getNextPosition(4, true)
-                pos eqq 3
+                pos eqq 4
             }
             "find pos on deletion 2" o {
                 val pos = mask.getNextPosition(3, true)
@@ -288,7 +315,16 @@ class MaskedHolderTest {
             }
             "find pos on deletion 4" o {
                 val pos = mask.getNextPosition(7, true)
-                pos eqq 5
+                pos eqq 7
+            }
+        }
+        "some pos cases" o {
+            val mask = Mask("+7(###) ###-##-##")
+            "pos after last char delete" o {
+                mask.getNextPosition(16, true) eqq 16
+            }
+            "pos after delete after fixed char" o {
+                mask.getNextPosition(15, true) eqq 15
             }
         }
     }
