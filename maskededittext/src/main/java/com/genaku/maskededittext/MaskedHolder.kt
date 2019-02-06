@@ -1,10 +1,9 @@
 package com.genaku.maskededittext
 
-import org.mym.plog.PLog
-
 class MaskedHolder(fmtString: String) {
 
     private var formatter = MaskedFormatter(fmtString)
+    private var maskString = fmtString
     private var mask: Mask = Mask(fmtString)
 
     var unmasked = ""
@@ -12,19 +11,23 @@ class MaskedHolder(fmtString: String) {
     val formatted: String
         get() = formatter.maskedString(unmasked)
 
-    fun getPosition(index: Int, isDeletion: Boolean) =
+    val lastInputPosition: Int
+        get() = formatted.length
+
+    fun getNewPosition(index: Int, isDeletion: Boolean) =
         mask.getNextPosition(index, isDeletion)
 
-    fun getLastInputPosition(): Int {
-        return formatted.length
-    }
-
     fun setMask(fmtString: String) {
+        maskString = fmtString
         mask = Mask(fmtString)
         formatter = MaskedFormatter(fmtString)
     }
 
-    fun deleteChars(start: Int, end: Int) {
+    fun getMask(): String {
+        return maskString
+    }
+
+    fun deleteUnmaskedChars(start: Int, end: Int) {
         val len = unmasked.length
         if (start < len) {
             val last = Math.min(len, end)
@@ -32,8 +35,8 @@ class MaskedHolder(fmtString: String) {
         }
     }
 
-    fun replaceChars(start: Int, end: Int, chars: CharSequence) {
-        PLog.d("replace chars [$start-$end] {$chars}")
+    fun replaceUnmaskedChars(start: Int, end: Int, chars: CharSequence) {
+//        PLog.d("replace chars [$start-$end] {$chars}")
         if (start > end || end < 0) {
             return
         }
@@ -56,19 +59,30 @@ class MaskedHolder(fmtString: String) {
             }
             unmasked = unmasked.replaceRange(start, end, chars.subSequence(0, replaceLen))
         } // else ignore
+
+        trimUnmasked()
+    }
+
+    private fun trimUnmasked() {
+        if (!mask.isEmpty && unmasked.length > mask.lastAllowedPos) {
+            unmasked = unmasked.substring(0, mask.lastAllowedPos)
+        }
     }
 
     fun deleteChars(input: String, start: Int, end: Int) {
-        val trimmed = input.substring(0, getLastInputPosition())
+        val trimmed = input.substring(0, lastInputPosition)
         val unmaskedStart = mask.convertPos(trimmed, start, true)
         val unmaskedEnd = mask.convertPos(trimmed, end, true)
-        deleteChars(unmaskedStart, unmaskedEnd)
+        deleteUnmaskedChars(unmaskedStart, unmaskedEnd)
     }
 
     fun replaceChars(input: String, start: Int, end: Int, chars: CharSequence) {
-        val trimmed = input.substring(0, getLastInputPosition())
+        val trimmed = if (input.length >= lastInputPosition)
+            input.substring(0, lastInputPosition)
+        else
+            input
         val unmaskedStart = mask.convertPos(trimmed, start)
         val unmaskedEnd = mask.convertPos(trimmed, end)
-        replaceChars(unmaskedStart, unmaskedEnd, chars)
+        replaceUnmaskedChars(unmaskedStart, unmaskedEnd, chars)
     }
 }

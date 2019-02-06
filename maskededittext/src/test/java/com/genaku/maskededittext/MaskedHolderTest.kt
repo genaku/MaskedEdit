@@ -16,46 +16,46 @@ class MaskedHolderTest {
             val initialText = "012345"
             "insert" o {
                 "in range" o {
-                    holder.replaceChars(0, 1, "s")
+                    holder.replaceUnmaskedChars(0, 1, "s")
                     holder.unmasked eqq "s"
                 }
                 "out range" o {
                     holder.unmasked = initialText
-                    holder.replaceChars(9, 10, "s")
+                    holder.replaceUnmaskedChars(9, 10, "s")
                     holder.unmasked eqq initialText
                 }
             }
             "replace" o {
                 holder.unmasked = initialText
                 "in range" o {
-                    holder.replaceChars(2, 3, "9")
+                    holder.replaceUnmaskedChars(2, 3, "9")
                     holder.unmasked eqq "019345"
                 }
                 "out range" o {
-                    holder.replaceChars(7, 8, "9")
+                    holder.replaceUnmaskedChars(7, 8, "9")
                     holder.unmasked eqq initialText
                 }
                 "less chars" o {
-                    holder.replaceChars(2, 5, "a")
+                    holder.replaceUnmaskedChars(2, 5, "a")
                     holder.unmasked eqq "01a5"
                 }
                 "more chars" o {
-                    holder.replaceChars(2, 3, "aaa")
+                    holder.replaceUnmaskedChars(2, 3, "aaa")
                     holder.unmasked eqq "01aaa345"
                 }
             }
             "delete" o {
                 holder.unmasked = initialText
                 "in range" o {
-                    holder.deleteChars(1, 2)
+                    holder.deleteUnmaskedChars(1, 2)
                     holder.unmasked eqq "02345"
                 }
                 "out range" o {
-                    holder.deleteChars(8, 9)
+                    holder.deleteUnmaskedChars(8, 9)
                     holder.unmasked eqq initialText
                 }
                 "cross range" o {
-                    holder.deleteChars(3, 9)
+                    holder.deleteUnmaskedChars(3, 9)
                     holder.unmasked eqq "012"
                 }
             }
@@ -63,31 +63,31 @@ class MaskedHolderTest {
         "mask" o {
             val holder = MaskedHolder(TEST_MASK)
             "insert first digit" o {
-                holder.replaceChars(0, 1, "9")
+                holder.replaceUnmaskedChars(0, 1, "9")
                 holder.unmasked eqq "9"
                 holder.formatted eqq "+7(9"
             }
             "insert 3 digits" o {
-                holder.replaceChars(0, 3, "902")
+                holder.replaceUnmaskedChars(0, 3, "902")
                 holder.unmasked eqq "902"
                 holder.formatted eqq "+7(902)"
             }
             "insert 4 digits" o {
-                holder.replaceChars(0, 4, "9026")
+                holder.replaceUnmaskedChars(0, 4, "9026")
                 holder.unmasked eqq "9026"
                 holder.formatted eqq "+7(902)6"
             }
             "insert 4 digits in sequence" o {
-                holder.replaceChars(0, 1, "9")
-                holder.replaceChars(1, 2, "0")
-                holder.replaceChars(2, 3, "2")
-                holder.replaceChars(3, 4, "6")
+                holder.replaceUnmaskedChars(0, 1, "9")
+                holder.replaceUnmaskedChars(1, 2, "0")
+                holder.replaceUnmaskedChars(2, 3, "2")
+                holder.replaceUnmaskedChars(3, 4, "6")
                 holder.unmasked eqq "9026"
                 holder.formatted eqq "+7(902)6"
             }
             "delete last digit" o {
                 holder.unmasked = "9026"
-                holder.deleteChars(3, 4)
+                holder.deleteUnmaskedChars(3, 4)
                 holder.unmasked eqq "902"
                 holder.formatted eqq "+7(902)"
             }
@@ -325,6 +325,12 @@ class MaskedHolderTest {
             }
             "pos after delete after fixed char" o {
                 mask.getNextPosition(15, true) eqq 15
+            }
+            "replace last char" o {
+                val holder = MaskedHolder("+7(###) ###-##-##")
+                holder.unmasked = "1234555556"
+                holder.replaceChars("+7(123) 455-55-56", 16, 16, "3")
+                holder.unmasked eqq "1234555553"
             }
         }
     }

@@ -4,7 +4,6 @@ import com.genaku.maskededittext.Utils.Companion.min
 import com.genaku.maskededittext.maskcharacters.FixedCharacter
 import com.genaku.maskededittext.maskcharacters.MaskCharacter
 import com.genaku.maskededittext.maskcharacters.MaskCharacterFabric
-import org.mym.plog.PLog
 import java.lang.StringBuilder
 import java.util.ArrayList
 
@@ -56,7 +55,7 @@ class Mask(val formatString: String) {
             }
         }
         validCursorPositions.add(mask.size)
-        PLog.d("valid size ${validCursorPositions.size}")
+//        PLog.d("valid size ${validCursorPositions.size}")
         if (mask.isEmpty()) {
             firstAllowedPosition = 0
             lastAllowedPosition = 0
@@ -67,7 +66,7 @@ class Mask(val formatString: String) {
     }
 
     fun getNextPosition(index: Int, isDeletion: Boolean): Int =
-        Math.min(lastAllowedPosition, getNextAvailablePosition(index, isDeletion))
+        min(lastAllowedPosition, getNextAvailablePosition(index, isDeletion))
 
     private fun getNextAvailablePosition(pos: Int, isDeletion: Boolean): Int {
         if (validCursorPositions.contains(pos)) {
@@ -75,12 +74,6 @@ class Mask(val formatString: String) {
             val iterator = validCursorPositions.listIterator(i)
             if (isDeletion) {
                 return iterator.next()
-//                if (iterator.hasPrevious()) {
-//                    iterator.previous()
-//                    if (iterator.hasNext()) {
-//                        return iterator.next()
-//                    }
-//                }
             } else {
                 if (iterator.hasNext()) {
                     val newPos = iterator.next()
@@ -121,8 +114,15 @@ class Mask(val formatString: String) {
     }
 
     fun convertPos(input: String, pos: Int, deletion: Boolean = false): Int {
+        if (isEmpty) {
+            return pos
+        }
         if (pos < firstAllowedPosition) {
             return 0
+        }
+
+        if (!deletion && pos == size - 1) {
+            return lastAllowedPos - 1
         }
 
         val str = trimInputStr(input)
@@ -162,5 +162,4 @@ class Mask(val formatString: String) {
         }
         return strBuilder.toString().reversed()
     }
-
 }
