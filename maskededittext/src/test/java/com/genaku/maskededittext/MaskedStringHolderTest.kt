@@ -7,12 +7,12 @@ import pl.mareklangiewicz.uspek.o
 import pl.mareklangiewicz.uspek.uspek
 
 @RunWith(USpekRunner::class)
-class MaskedHolderTest {
+class MaskedStringHolderTest {
 
     @Test
     fun test() = uspek {
         "holder without mask" o {
-            val holder = MaskedHolder("")
+            val holder = MaskedStringHolder("")
             val initialText = "012345"
             "insert" o {
                 "in range" o {
@@ -61,21 +61,21 @@ class MaskedHolderTest {
             }
         }
         "mask" o {
-            val holder = MaskedHolder(TEST_MASK)
+            val holder = MaskedStringHolder(TEST_MASK)
             "insert first digit" o {
                 holder.replaceUnmaskedChars(0, 1, "9")
                 holder.unmasked eqq "9"
-                holder.formatted eqq "+7(9"
+                holder.formatted.toString() eqq "+7(9"
             }
             "insert 3 digits" o {
                 holder.replaceUnmaskedChars(0, 3, "902")
                 holder.unmasked eqq "902"
-                holder.formatted eqq "+7(902)"
+                holder.formatted.toString() eqq "+7(902)"
             }
             "insert 4 digits" o {
                 holder.replaceUnmaskedChars(0, 4, "9026")
                 holder.unmasked eqq "9026"
-                holder.formatted eqq "+7(902)6"
+                holder.formatted.toString() eqq "+7(902)6"
             }
             "insert 4 digits in sequence" o {
                 holder.replaceUnmaskedChars(0, 1, "9")
@@ -83,24 +83,17 @@ class MaskedHolderTest {
                 holder.replaceUnmaskedChars(2, 3, "2")
                 holder.replaceUnmaskedChars(3, 4, "6")
                 holder.unmasked eqq "9026"
-                holder.formatted eqq "+7(902)6"
+                holder.formatted.toString() eqq "+7(902)6"
             }
             "delete last digit" o {
                 holder.unmasked = "9026"
                 holder.deleteUnmaskedChars(3, 4)
                 holder.unmasked eqq "902"
-                holder.formatted eqq "+7(902)"
+                holder.formatted.toString() eqq "+7(902)"
             }
             "empty unmasked should show empty formatted" o {
                 holder.unmasked = ""
-                holder.formatted eqq ""
-            }
-        }
-        "mask formatter" o {
-            val formatter = MaskedFormatter(TEST_MASK)
-            "get raw  string" o {
-                val raw = formatter.rawString("+7(902)6**")
-                raw eqq "9026"
+                holder.formatted.toString() eqq ""
             }
         }
         "mask pos converter" o {
@@ -142,7 +135,7 @@ class MaskedHolderTest {
             }
         }
         "delete in masked" o {
-            val holder = MaskedHolder(TEST_MASK)
+            val holder = MaskedStringHolder(TEST_MASK)
             val input = "+7(902)6**"
             val formatted = "+7(902)6"
             val raw = "9026"
@@ -150,37 +143,37 @@ class MaskedHolderTest {
             "delete in prepopulated" o {
                 holder.deleteChars(input, 0, 1)
                 holder.unmasked eqq raw
-                holder.formatted eqq formatted
+                holder.formatted.toString() eqq formatted
             }
             "delete first digit" o {
                 holder.deleteChars(input, 3, 4)
                 holder.unmasked eqq "026"
-                holder.formatted eqq "+7(026)"
+                holder.formatted.toString() eqq "+7(026)"
             }
             "delete last char" o {
                 holder.unmasked = "44"
                 holder.deleteChars("+7(44", 4, 5)
                 holder.unmasked eqq "4"
-                holder.formatted eqq "+7(4"
+                holder.formatted.toString() eqq "+7(4"
             }
             "delete last input digit" o {
                 holder.deleteChars(input, 7, 8)
                 holder.unmasked eqq "902"
-                holder.formatted eqq "+7(902)"
+                holder.formatted.toString() eqq "+7(902)"
             }
             "delete out of input" o {
                 holder.deleteChars(input, 10, 11)
                 holder.unmasked eqq raw
-                holder.formatted eqq formatted
+                holder.formatted.toString() eqq formatted
             }
             "delete out of field" o {
                 holder.deleteChars(input, 20, 21)
                 holder.unmasked eqq raw
-                holder.formatted eqq formatted
+                holder.formatted.toString() eqq formatted
             }
         }
         "delete in other mask" o {
-            val holder = MaskedHolder("+7(###) ###-##-##")
+            val holder = MaskedStringHolder("+7(###) ###-##-##")
             holder.unmasked = "1234567890"
             "delete char at the end" o {
                 holder.deleteChars("+7(123) 456-78-90", 16, 17)
@@ -192,7 +185,7 @@ class MaskedHolderTest {
             }
         }
         "replace in masked" o {
-            val holder = MaskedHolder(TEST_MASK)
+            val holder = MaskedStringHolder(TEST_MASK)
             val input = "+7(902)6**"
             val formatted = "+7(902)6"
             val raw = "9026"
@@ -200,31 +193,31 @@ class MaskedHolderTest {
             "replace in prepopulated" o {
                 holder.replaceChars(input, 0, 1, "0")
                 holder.unmasked eqq raw
-                holder.formatted eqq formatted
+                holder.formatted.toString() eqq formatted
             }
             "replace first digit" o {
                 holder.replaceChars(input, 3, 4, "0")
                 holder.unmasked eqq "0026"
-                holder.formatted eqq "+7(002)6"
+                holder.formatted.toString() eqq "+7(002)6"
             }
             "replace last input digit" o {
                 holder.replaceChars(input, 7, 8, "0")
                 holder.unmasked eqq "9020"
-                holder.formatted eqq "+7(902)0"
+                holder.formatted.toString() eqq "+7(902)0"
             }
             "replace out of input" o {
                 holder.replaceChars(input, 10, 11, "0")
-                holder.unmasked eqq "9026"
-                holder.formatted eqq "+7(902)6"
+                holder.unmasked eqq "90260"
+                holder.formatted.toString() eqq "+7(902)60"
             }
             "replace out of field" o {
                 holder.replaceChars(input, 20, 21, "0")
-                holder.unmasked eqq "9026"
-                holder.formatted eqq "+7(902)6"
+                holder.unmasked eqq "90260"
+                holder.formatted.toString() eqq "+7(902)60"
             }
         }
         "insert in masked" o {
-            val holder = MaskedHolder(TEST_MASK)
+            val holder = MaskedStringHolder(TEST_MASK)
             val input = "+7(902)6**"
             val formatted = "+7(902)6"
             val raw = "9026"
@@ -232,48 +225,48 @@ class MaskedHolderTest {
             "insert in prepopulated" o {
                 holder.replaceChars(input, 0, 0, "0")
                 holder.unmasked eqq raw
-                holder.formatted eqq formatted
+                holder.formatted.toString() eqq formatted
             }
             "insert first digit" o {
                 holder.replaceChars(input, 3, 3, "0")
                 holder.unmasked eqq "09026"
-                holder.formatted eqq "+7(090)26"
+                holder.formatted.toString() eqq "+7(090)26"
             }
             "insert last input digit" o {
                 holder.replaceChars(input, 7, 7, "0")
-                holder.unmasked eqq "90206"
-                holder.formatted eqq "+7(902)06"
+                holder.unmasked eqq "90260"
+                holder.formatted.toString() eqq "+7(902)60"
             }
             "insert out of input" o {
                 holder.replaceChars(input, 10, 10, "0")
-                holder.unmasked eqq "9026"
-                holder.formatted eqq "+7(902)6"
+                holder.unmasked eqq "90260"
+                holder.formatted.toString() eqq "+7(902)60"
             }
             "insert out of field" o {
                 holder.replaceChars(input, 20, 20, "0")
-                holder.unmasked eqq "9026"
-                holder.formatted eqq "+7(902)6"
+                holder.unmasked eqq "90260"
+                holder.formatted.toString() eqq "+7(902)60"
             }
         }
         "add in masked" o {
-            val holder = MaskedHolder(TEST_MASK)
+            val holder = MaskedStringHolder(TEST_MASK)
             "add second digit" o {
                 holder.unmasked = "1"
                 holder.replaceChars("+7(1", 4, 4, "2")
                 holder.unmasked eqq "12"
-                holder.formatted eqq "+7(12"
+                holder.formatted.toString() eqq "+7(12"
             }
             "add 3rd digit" o {
                 holder.unmasked = "12"
                 holder.replaceChars("+7(12", 5, 5, "3")
                 holder.unmasked eqq "123"
-                holder.formatted eqq "+7(123)"
+                holder.formatted.toString() eqq "+7(123)"
             }
             "add 4th digit" o {
                 holder.unmasked = "123"
                 holder.replaceChars("+7(123)", 7, 7, "4")
                 holder.unmasked eqq "1234"
-                holder.formatted eqq "+7(123)4"
+                holder.formatted.toString() eqq "+7(123)4"
             }
         }
     }
@@ -331,7 +324,7 @@ class MaskedHolderTest {
                 mask.getNextPosition(15, true) eqq 15
             }
             "replace last char" o {
-                val holder = MaskedHolder("+7(###) ###-##-##")
+                val holder = MaskedStringHolder("+7(###) ###-##-##")
                 holder.unmasked = "1234555556"
                 holder.replaceChars("+7(123) 455-55-56", 16, 16, "3")
                 holder.unmasked eqq "1234555553"

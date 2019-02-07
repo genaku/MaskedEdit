@@ -1,6 +1,11 @@
 package com.genaku.maskededittext.maskcharacters
 
-internal class DigitCharacter : MaskCharacter() {
+/**
+ * Digital mask character
+ *
+ *  @author Gena Kuchergin
+ */
+class DigitCharacter : MaskCharacter() {
 
     override fun isValidCharacter(ch: Char): Boolean =
         Character.isDigit(ch)

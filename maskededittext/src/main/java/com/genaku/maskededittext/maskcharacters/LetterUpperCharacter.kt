@@ -1,6 +1,11 @@
 package com.genaku.maskededittext.maskcharacters
 
-internal class LetterUpperCharacter : UpperCaseCharacter() {
+/**
+ * Upper letter mask character
+ *
+ *  @author Gena Kuchergin
+ */
+class LetterUpperCharacter : UpperCaseCharacter() {
 
     override fun isValidCustom(ch: Char): Boolean =
         Character.isLetter(ch)

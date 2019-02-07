@@ -1,6 +1,11 @@
 package com.genaku.maskededittext.maskcharacters
 
-internal class AlphaNumericCharacter : MaskCharacter() {
+/**
+ * Letter or digit mask character
+ *
+ *  @author Gena Kuchergin
+ */
+class AlphaNumericCharacter : MaskCharacter() {
 
     override fun isValidCharacter(ch: Char): Boolean =
         Character.isLetterOrDigit(ch)

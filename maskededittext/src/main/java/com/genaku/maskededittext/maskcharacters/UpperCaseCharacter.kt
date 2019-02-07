@@ -1,5 +1,10 @@
 package com.genaku.maskededittext.maskcharacters
 
+/**
+ * Base abstract upper mask character
+ *
+ *  @author Gena Kuchergin
+ */
 abstract class UpperCaseCharacter : MaskCharacter() {
 
     abstract fun isValidCustom(ch: Char): Boolean

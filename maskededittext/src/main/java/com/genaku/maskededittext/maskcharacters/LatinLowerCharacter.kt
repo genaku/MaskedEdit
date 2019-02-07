@@ -1,5 +1,10 @@
 package com.genaku.maskededittext.maskcharacters
 
+/**
+ * Lower latin mask character
+ *
+ *  @author Gena Kuchergin
+ */
 class LatinLowerCharacter : LowerCaseCharacter() {
 
     override fun isValidCustom(ch: Char): Boolean =

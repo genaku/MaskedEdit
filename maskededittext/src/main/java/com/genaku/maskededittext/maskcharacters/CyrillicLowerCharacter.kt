@@ -1,5 +1,10 @@
 package com.genaku.maskededittext.maskcharacters
 
+/**
+ * Lower cyrillic mask character
+ *
+ *  @author Gena Kuchergin
+ */
 class CyrillicLowerCharacter : LowerCaseCharacter() {
 
     override fun isValidCustom(ch: Char): Boolean =

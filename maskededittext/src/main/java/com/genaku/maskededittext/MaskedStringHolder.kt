@@ -1,8 +1,12 @@
 package com.genaku.maskededittext
 
-class MaskedHolder(fmtString: String) {
+/**
+ * Class to process masked string
+ *
+ *  @author Gena Kuchergin
+ */
+class MaskedStringHolder(fmtString: String) {
 
-    private var formatter = MaskedFormatter(fmtString)
     private var maskString = fmtString
     private var mask: Mask = Mask(fmtString)
 
@@ -11,11 +15,11 @@ class MaskedHolder(fmtString: String) {
     val isEmpty
         get() = mask.isEmpty
 
-    val formatted: String
-        get() = formatter.maskedString(unmasked)
+    val formatted: CharSequence
+        get() = mask.getFormatted(unmasked)
 
-    val lastInputPosition: Int
-        get() = formatted.length
+    val fullFormatted: CharSequence
+        get() = mask.getFullFormatted(unmasked)
 
     fun getNewPosition(index: Int, isDeletion: Boolean) =
         mask.getNextPosition(index, isDeletion)
@@ -23,7 +27,6 @@ class MaskedHolder(fmtString: String) {
     fun setMask(fmtString: String) {
         maskString = fmtString
         mask = Mask(fmtString)
-        formatter = MaskedFormatter(fmtString)
         trimUnmasked()
     }
 
@@ -74,6 +77,7 @@ class MaskedHolder(fmtString: String) {
     }
 
     fun deleteChars(input: String, start: Int, end: Int) {
+        val lastInputPosition = formatted.length
         val trimmed = input.substring(0, lastInputPosition)
         val unmaskedStart = mask.convertPos(trimmed, start, true)
         val unmaskedEnd = mask.convertPos(trimmed, end, true)
@@ -81,6 +85,7 @@ class MaskedHolder(fmtString: String) {
     }
 
     fun replaceChars(input: String, start: Int, end: Int, chars: CharSequence) {
+        val lastInputPosition = formatted.length
         val trimmed = if (input.length >= lastInputPosition)
             input.substring(0, lastInputPosition)
         else

@@ -1,18 +1,26 @@
 package com.genaku.maskededittext
 
 import android.content.Context
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatEditText
 
+/**
+ * Android EditText with mask
+ *
+ *  @author Gena Kuchergin
+ */
 class MaskedEditText(context: Context, attrs: AttributeSet) :
     AppCompatEditText(context, attrs) {
 
-    private val maskedHolder = MaskedHolder("")
+    private val maskedHolder = MaskedStringHolder("")
 
     private val maskedInputFilter = MaskedInputFilter(
-        maskedHolder = maskedHolder,
-        setSelection = { pos -> setNewPos(pos) },
-        setText = { s -> this.setText(s) }
+        maskedStringHolder = maskedHolder,
+        setSelection = this::setNewPos,
+        setText = this::updateText
     )
 
     init {
@@ -27,7 +35,7 @@ class MaskedEditText(context: Context, attrs: AttributeSet) :
         }
 
     fun getMaskedString(): String =
-        maskedHolder.formatted
+        maskedHolder.formatted.toString()
 
     fun getUnmaskedString(): String =
         maskedHolder.unmasked
@@ -60,4 +68,17 @@ class MaskedEditText(context: Context, attrs: AttributeSet) :
         val lastPos = getNotNullText().length
         setSelection(Math.max(0, Math.min(pos, lastPos)))
     }
+
+    private fun updateText(s: CharSequence) {
+        val text = maskedHolder.fullFormatted
+        val coloredText = SpannableString(text)
+        coloredText.setSpan(
+            ForegroundColorSpan(currentHintTextColor),
+            s.length,
+            text.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        setText(coloredText)
+    }
+
 }

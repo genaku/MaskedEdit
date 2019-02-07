@@ -1,6 +1,13 @@
 package com.genaku.maskededittext.maskcharacters
 
-internal class MaskCharacterFabric {
+/**
+ * Mask character fabric
+ *
+ * converts char from mask format string into MaskCharacter object
+ *
+ *  @author Gena Kuchergin
+ */
+class MaskCharacterFabric {
 
     fun buildCharacter(ch: Char): MaskCharacter = when (ch) {
         DIGIT_KEY -> DigitCharacter()

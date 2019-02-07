@@ -1,6 +1,11 @@
 package com.genaku.maskededittext.maskcharacters
 
-internal class HexCharacter : MaskCharacter() {
+/**
+ * Hex mask character
+ *
+ *  @author Gena Kuchergin
+ */
+class HexCharacter : MaskCharacter() {
 
     override fun isValidCharacter(ch: Char): Boolean = ch.toUpperCase() in HEX_CHARS
 

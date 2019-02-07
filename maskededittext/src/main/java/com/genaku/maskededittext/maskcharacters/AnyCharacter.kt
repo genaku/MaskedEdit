@@ -1,6 +1,11 @@
 package com.genaku.maskededittext.maskcharacters
 
-internal class AnyCharacter : MaskCharacter() {
+/**
+ * Any mask character
+ *
+ *  @author Gena Kuchergin
+ */
+class AnyCharacter : MaskCharacter() {
 
     override fun isValidCharacter(ch: Char): Boolean = true
 

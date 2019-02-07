@@ -1,13 +1,16 @@
 package com.genaku.maskededittext
 
-import com.genaku.maskededittext.Utils.Companion.min
 import com.genaku.maskededittext.maskcharacters.FixedCharacter
 import com.genaku.maskededittext.maskcharacters.MaskCharacter
 import com.genaku.maskededittext.maskcharacters.MaskCharacterFabric
-import java.lang.StringBuilder
-import java.util.ArrayList
+import java.util.*
 
-class Mask(val formatString: String) {
+/**
+ * Mask handler
+ *
+ *  @author Gena Kuchergin
+ */
+class Mask(formatString: String) {
 
     private val fabric = MaskCharacterFabric()
     private var maskChars: List<MaskCharacter> = buildMask(formatString)
@@ -45,8 +48,11 @@ class Mask(val formatString: String) {
         return result
     }
 
-    fun getFormattedString(value: String) =
-        FormattedString(this, value)
+    fun getFormatted(value: String) =
+        MaskFormatter.formatString(this, value)
+
+    fun getFullFormatted(value: String) =
+        MaskFormatter.getFullFormatted(this, value)
 
     private fun initValidCursorPositions(mask: List<MaskCharacter>) {
         for (i in 0 until mask.size) {
@@ -161,5 +167,13 @@ class Mask(val formatString: String) {
             }
         }
         return strBuilder.toString().reversed()
+    }
+
+    private fun min(vararg values: Int): Int {
+        var result = values[0]
+        for (i in 1 until values.size) {
+            result = Math.min(result, values[i])
+        }
+        return result
     }
 }

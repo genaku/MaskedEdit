@@ -1,5 +1,10 @@
 package com.genaku.maskededittext.maskcharacters
 
+/**
+ * Upper cyrillic mask character
+ *
+ *  @author Gena Kuchergin
+ */
 class CyrillicUpperCharacter : UpperCaseCharacter() {
 
     override fun isValidCustom(ch: Char): Boolean =
