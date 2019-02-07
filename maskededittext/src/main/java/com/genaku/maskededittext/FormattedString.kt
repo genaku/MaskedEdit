@@ -31,6 +31,10 @@ class FormattedString(private val mask: Mask, rawString: String) : CharSequence 
     }
 
     private fun formatString(rawString: String): String {
+        if (rawString.isEmpty()) {
+            return ""
+        }
+
         val builder = StringBuilder()
 
         var strIndex = 0

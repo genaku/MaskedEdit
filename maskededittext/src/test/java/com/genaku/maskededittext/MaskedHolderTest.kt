@@ -91,17 +91,21 @@ class MaskedHolderTest {
                 holder.unmasked eqq "902"
                 holder.formatted eqq "+7(902)"
             }
+            "empty unmasked should show empty formatted" o {
+                holder.unmasked = ""
+                holder.formatted eqq ""
+            }
         }
         "mask formatter" o {
             val formatter = MaskedFormatter(TEST_MASK)
             "get raw  string" o {
-                val raw = formatter.rawString("+7(902)6##")
+                val raw = formatter.rawString("+7(902)6**")
                 raw eqq "9026"
             }
         }
         "mask pos converter" o {
             val mask = Mask(TEST_MASK)
-            val input = "+7(902)6##"
+            val input = "+7(902)6**"
             val raw = "9026"
             "get out of pos" o {
                 mask.convertPos(input, 10) eqq 4
@@ -134,12 +138,12 @@ class MaskedHolderTest {
                 mask.convertPos("+7(44", 5, true) eqq 2
             }
             "get last pos on delete 2" o {
-                mask.convertPos("+7(902)6##", 8, true) eqq 4
+                mask.convertPos("+7(902)6**", 8, true) eqq 4
             }
         }
         "delete in masked" o {
             val holder = MaskedHolder(TEST_MASK)
-            val input = "+7(902)6##"
+            val input = "+7(902)6**"
             val formatted = "+7(902)6"
             val raw = "9026"
             holder.unmasked = raw
@@ -189,7 +193,7 @@ class MaskedHolderTest {
         }
         "replace in masked" o {
             val holder = MaskedHolder(TEST_MASK)
-            val input = "+7(902)6##"
+            val input = "+7(902)6**"
             val formatted = "+7(902)6"
             val raw = "9026"
             holder.unmasked = raw
@@ -221,7 +225,7 @@ class MaskedHolderTest {
         }
         "insert in masked" o {
             val holder = MaskedHolder(TEST_MASK)
-            val input = "+7(902)6##"
+            val input = "+7(902)6**"
             val formatted = "+7(902)6"
             val raw = "9026"
             holder.unmasked = raw

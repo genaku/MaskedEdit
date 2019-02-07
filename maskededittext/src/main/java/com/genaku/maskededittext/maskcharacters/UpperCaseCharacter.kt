@@ -1,13 +1,12 @@
 package com.genaku.maskededittext.maskcharacters
 
-internal class UpperCaseCharacter : MaskCharacter() {
+abstract class UpperCaseCharacter : MaskCharacter() {
+
+    abstract fun isValidCustom(ch: Char): Boolean
 
     override fun isValidCharacter(ch: Char): Boolean =
-        Character.isUpperCase(ch)
+        isValidCustom(ch) && Character.isUpperCase(ch)
 
     override fun processCharacter(ch: Char): Char =
         Character.toUpperCase(ch)
-
-    override val viewChar: Char = 'U'
-
 }

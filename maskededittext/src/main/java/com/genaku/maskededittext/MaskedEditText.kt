@@ -11,7 +11,7 @@ class MaskedEditText(context: Context, attrs: AttributeSet) :
 
     private val maskedInputFilter = MaskedInputFilter(
         maskedHolder = maskedHolder,
-        setSelection = { pos -> this.setSelection(pos) },
+        setSelection = { pos -> setNewPos(pos) },
         setText = { s -> this.setText(s) }
     )
 
@@ -26,8 +26,19 @@ class MaskedEditText(context: Context, attrs: AttributeSet) :
             maskedInputFilter.refreshText()
         }
 
+    fun getMaskedString(): String =
+        maskedHolder.formatted
+
+    fun getUnmaskedString(): String =
+        maskedHolder.unmasked
+
+    fun setUnmaskedString(value: String) {
+        maskedHolder.unmasked = value
+        maskedInputFilter.refreshText()
+    }
+
     private fun initByAttr(context: Context, attrs: AttributeSet) {
-        setUnmaskedString(text.toString())
+        setUnmaskedString(getNotNullText())
 
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.MaskedEditText)
 
@@ -40,14 +51,13 @@ class MaskedEditText(context: Context, attrs: AttributeSet) :
         filters = arrayOf(maskedInputFilter)
     }
 
-    fun getMaskedString(): String =
-        maskedHolder.formatted
+    private fun getNotNullText(): String {
+        text ?: return ""
+        return text.toString()
+    }
 
-    fun getUnmaskedString(): String =
-        maskedHolder.unmasked
-
-    fun setUnmaskedString(value: String) {
-        maskedHolder.unmasked = value
-        maskedInputFilter.refreshText()
+    private fun setNewPos(pos: Int) {
+        val lastPos = getNotNullText().length
+        setSelection(Math.max(0, Math.min(pos, lastPos)))
     }
 }
