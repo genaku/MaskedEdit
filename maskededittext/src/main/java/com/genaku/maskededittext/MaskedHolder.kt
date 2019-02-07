@@ -8,6 +8,9 @@ class MaskedHolder(fmtString: String) {
 
     var unmasked = ""
 
+    val isEmpty
+        get() = mask.isEmpty
+
     val formatted: String
         get() = formatter.maskedString(unmasked)
 
@@ -21,6 +24,7 @@ class MaskedHolder(fmtString: String) {
         maskString = fmtString
         mask = Mask(fmtString)
         formatter = MaskedFormatter(fmtString)
+        trimUnmasked()
     }
 
     fun getMask(): String {

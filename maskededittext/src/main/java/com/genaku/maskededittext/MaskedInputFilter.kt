@@ -21,6 +21,7 @@ class MaskedInputFilter(
     ): CharSequence? {
         source ?: return null
         if (textSetup) return source
+        if (maskedHolder.isEmpty) return source
 
 //        PLog.d("source [$start-$end] [$source]")
 //        PLog.d("dest [$dstart-$dend] [$dest]")
@@ -32,17 +33,21 @@ class MaskedInputFilter(
         } else {
             maskedHolder.replaceChars(dest.toString(), dstart, dend, source)
         }
+
         val pos = maskedHolder.getNewPosition(dstart, isDeletion)
 
 //        PLog.d("unmasked [${maskedHolder.unmasked}]")
 //        PLog.d("masked [${maskedHolder.formatted}]")
 //        PLog.d("new pos [$pos]")
 //
+        refreshText(pos)
+        return null
+    }
+
+    fun refreshText(pos: Int? = null) {
         textSetup = true
         setText(maskedHolder.formatted)
-        setSelection(pos)
+        setSelection(pos ?: maskedHolder.formatted.length)
         textSetup = false
-
-        return null
     }
 }

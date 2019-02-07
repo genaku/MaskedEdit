@@ -21,10 +21,33 @@ class MaskedEditText(context: Context, attrs: AttributeSet) :
 
     var mask: String
         get() = maskedHolder.getMask()
-        set(value) = maskedHolder.setMask(value)
+        set(value) {
+            maskedHolder.setMask(value)
+            maskedInputFilter.refreshText()
+        }
 
     private fun initByAttr(context: Context, attrs: AttributeSet) {
-        maskedHolder.setMask("+7(###) ###-##-##")
+        setUnmaskedString(text.toString())
+
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.MaskedEditText)
+
+        if (typedArray.hasValue(R.styleable.MaskedEditText_mask)) {
+            val maskStr = typedArray.getString(R.styleable.MaskedEditText_mask)
+            mask = maskStr ?: ""
+        }
+        typedArray.recycle()
+
         filters = arrayOf(maskedInputFilter)
+    }
+
+    fun getMaskedString(): String =
+        maskedHolder.formatted
+
+    fun getUnmaskedString(): String =
+        maskedHolder.unmasked
+
+    fun setUnmaskedString(value: String) {
+        maskedHolder.unmasked = value
+        maskedInputFilter.refreshText()
     }
 }
