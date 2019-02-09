@@ -192,8 +192,8 @@ class MaskedStringHolderTest {
             holder.unmasked = raw
             "replace in prepopulated" o {
                 holder.replaceChars(input, 0, 1, "0")
-                holder.unmasked eqq raw
-                holder.formatted.toString() eqq formatted
+                holder.unmasked eqq "09026"
+                holder.formatted.toString() eqq "+7(090)26"
             }
             "replace first digit" o {
                 holder.replaceChars(input, 3, 4, "0")
@@ -224,8 +224,8 @@ class MaskedStringHolderTest {
             holder.unmasked = raw
             "insert in prepopulated" o {
                 holder.replaceChars(input, 0, 0, "0")
-                holder.unmasked eqq raw
-                holder.formatted.toString() eqq formatted
+                holder.unmasked eqq "09026"
+                holder.formatted.toString() eqq "+7(090)26"
             }
             "insert first digit" o {
                 holder.replaceChars(input, 3, 3, "0")

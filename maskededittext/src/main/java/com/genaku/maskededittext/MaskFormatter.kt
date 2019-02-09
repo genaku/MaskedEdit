@@ -36,10 +36,6 @@ class MaskFormatter {
 
         @JvmStatic
         fun getFullFormatted(mask: Mask, rawString: String): CharSequence {
-            if (rawString.isEmpty()) {
-                return ""
-            }
-
             val builder = StringBuilder()
             var maskCharIndex = prebuild(builder, mask, rawString)
 

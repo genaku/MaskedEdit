@@ -2,6 +2,7 @@ package com.genaku.maskededittext
 
 import android.text.InputFilter
 import android.text.Spanned
+import org.mym.plog.PLog
 
 /**
  * Android EditText input filter for masked text
@@ -28,8 +29,8 @@ class MaskedInputFilter(
         if (textSetup) return source
         if (maskedStringHolder.isEmpty) return source
 
-//        PLog.d("source [$start-$end] [$source]")
-//        PLog.d("dest [$dstart-$dend] [$dest]")
+        PLog.d("source [$start-$end] [$source]")
+        PLog.d("dest [$dstart-$dend] [$dest]")
 
         val isDeletion = source.isEmpty()
 
@@ -41,10 +42,6 @@ class MaskedInputFilter(
 
         val pos = maskedStringHolder.getNewPosition(dstart, isDeletion)
 
-//        PLog.d("unmasked [${maskedStringHolder.unmasked}]")
-//        PLog.d("masked [${maskedStringHolder.formatted}]")
-//        PLog.d("new pos [$pos]")
-//
         refreshText(pos)
         return null
     }
@@ -55,6 +52,11 @@ class MaskedInputFilter(
         val correctPos = Math.min(pos ?: formatted.length, formatted.length)
         setText(formatted)
         setSelection(correctPos)
+
+        PLog.d("unmasked [${maskedStringHolder.unmasked}]")
+        PLog.d("masked [${maskedStringHolder.formatted}]")
+        PLog.d("new pos [$correctPos]")
+
         textSetup = false
     }
 }

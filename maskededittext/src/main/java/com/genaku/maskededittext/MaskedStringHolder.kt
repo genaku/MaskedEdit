@@ -1,5 +1,7 @@
 package com.genaku.maskededittext
 
+import org.mym.plog.PLog
+
 /**
  * Class to process masked string
  *
@@ -16,13 +18,15 @@ class MaskedStringHolder(fmtString: String) {
         get() = mask.isEmpty
 
     val formatted: CharSequence
-        get() = mask.getFormatted(unmasked)
+        get() = MaskFormatter.formatString(mask, unmasked)
 
     val fullFormatted: CharSequence
-        get() = mask.getFullFormatted(unmasked)
+        get() {
+            return MaskFormatter.getFullFormatted(mask, unmasked)
+        }
 
     fun getNewPosition(index: Int, isDeletion: Boolean) =
-        mask.getNextPosition(index, isDeletion)
+            mask.getNextPosition(index, isDeletion)
 
     fun setMask(fmtString: String) {
         maskString = fmtString
@@ -43,7 +47,7 @@ class MaskedStringHolder(fmtString: String) {
     }
 
     fun replaceUnmaskedChars(start: Int, end: Int, chars: CharSequence) {
-//        PLog.d("replace chars [$start-$end] {$chars}")
+        PLog.d("replace chars [$start-$end] {$chars}")
         if (start > end || end < 0) {
             return
         }

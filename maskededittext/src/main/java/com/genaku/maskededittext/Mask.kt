@@ -48,12 +48,6 @@ class Mask(formatString: String) {
         return result
     }
 
-    fun getFormatted(value: String) =
-        MaskFormatter.formatString(this, value)
-
-    fun getFullFormatted(value: String) =
-        MaskFormatter.getFullFormatted(this, value)
-
     private fun initValidCursorPositions(mask: List<MaskCharacter>) {
         for (i in 0 until mask.size) {
             if (mask[i] !is FixedCharacter) {
@@ -72,7 +66,7 @@ class Mask(formatString: String) {
     }
 
     fun getNextPosition(index: Int, isDeletion: Boolean): Int =
-        min(lastAllowedPosition, getNextAvailablePosition(index, isDeletion))
+            min(lastAllowedPosition, getNextAvailablePosition(index, isDeletion))
 
     private fun getNextAvailablePosition(pos: Int, isDeletion: Boolean): Int {
         if (validCursorPositions.contains(pos)) {
@@ -134,22 +128,33 @@ class Mask(formatString: String) {
         val str = trimInputStr(input)
 
         val lastStrPos = str.length - 1
-        val inputLen = min(size, pos, lastStrPos)
 
         var result = -1
-        for (i in 0..inputLen) {
-            val strChar = str[i]
-            val maskChar = maskChars[i]
-            if (maskChar !is FixedCharacter && strChar != maskChar.viewChar) {
-                result++
+
+        if (lastStrPos < 0) {
+            val inputLen = min(size, pos)
+            for (i in 0..inputLen) {
+                val maskChar = maskChars[i]
+                if (maskChar !is FixedCharacter) {
+                    result++
+                }
             }
-            if (i == lastStrPos) {
-                if (deletion) {
-                    if (pos > lastStrPos) {
+        } else {
+            val inputLen = min(size, pos, lastStrPos)
+            for (i in 0..inputLen) {
+                val strChar = str[i]
+                val maskChar = maskChars[i]
+                if (maskChar !is FixedCharacter && strChar != maskChar.viewChar) {
+                    result++
+                }
+                if (i == lastStrPos) {
+                    if (deletion) {
+                        if (pos > lastStrPos) {
+                            result++
+                        }
+                    } else {
                         result++
                     }
-                } else {
-                    result++
                 }
             }
         }
