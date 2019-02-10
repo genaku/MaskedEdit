@@ -3,7 +3,6 @@ package com.genaku.maskededittext
 import com.genaku.maskededittext.maskcharacters.FixedCharacter
 import com.genaku.maskededittext.maskcharacters.MaskCharacter
 import com.genaku.maskededittext.maskcharacters.MaskCharacterFabric
-import java.util.*
 
 /**
  * Mask handler
@@ -16,57 +15,35 @@ class Mask(formatString: String) {
     private var maskChars: List<MaskCharacter> = buildMask(formatString)
 
     val validCursorPositions = ArrayList<Int>()
+    val posAfterDelete = ArrayList<Int>()
+    val posAfterAdd = ArrayList<Int>()
+    val unmaskPos = ArrayList<Int>()
+    val unmaskDelPos = ArrayList<Int>()
     private var firstAllowedPosition: Int = 0
     private var lastAllowedPosition: Int = 0
 
     init {
         initValidCursorPositions(maskChars)
+        initIds()
     }
 
     val size = maskChars.size
 
     val isEmpty = (size == 0)
 
-    val lastAllowedPos
+    val lastAllowedUnmaskedPos
         get() = validCursorPositions.size - 1
 
     operator fun get(index: Int): MaskCharacter = maskChars[index]
 
-    fun isValidFixedCharacter(ch: Char, at: Int): Boolean {
-        if (at !in 0..maskChars.size) {
-            return false
-        }
-        val maskChar = maskChars[at]
-        return maskChar is FixedCharacter && maskChar.isValidCharacter(ch)
+    /**
+     * Get next cursor position after operation
+     */
+    fun getNextPosition(currentPos: Int, isDeletion: Boolean): Int = when { // order of when cases is important
+        currentPos > lastAllowedPosition -> lastAllowedPosition
+        isDeletion -> posAfterDelete[currentPos]
+        else -> posAfterAdd[currentPos]
     }
-
-    private fun buildMask(fmtString: String): List<MaskCharacter> {
-        val result = ArrayList<MaskCharacter>()
-        for (ch in fmtString.toCharArray()) {
-            result.add(fabric.buildCharacter(ch))
-        }
-        return result
-    }
-
-    private fun initValidCursorPositions(mask: List<MaskCharacter>) {
-        for (i in 0 until mask.size) {
-            if (mask[i] !is FixedCharacter) {
-                validCursorPositions.add(i)
-            }
-        }
-        validCursorPositions.add(mask.size)
-//        PLog.d("valid size ${validCursorPositions.size}")
-        if (mask.isEmpty()) {
-            firstAllowedPosition = 0
-            lastAllowedPosition = 0
-        } else {
-            firstAllowedPosition = validCursorPositions[0]
-            lastAllowedPosition = validCursorPositions[validCursorPositions.size - 1]
-        }
-    }
-
-    fun getNextPosition(index: Int, isDeletion: Boolean): Int =
-            min(lastAllowedPosition, getNextAvailablePosition(index, isDeletion))
 
     private fun getNextAvailablePosition(pos: Int, isDeletion: Boolean): Int {
         if (validCursorPositions.contains(pos)) {
@@ -113,65 +90,70 @@ class Mask(formatString: String) {
         }
     }
 
-    fun convertPos(input: String, pos: Int, deletion: Boolean = false): Int {
-        if (isEmpty) {
-            return pos
-        }
-        if (pos < firstAllowedPosition) {
-            return 0
-        }
+    /**
+     * Convert cursor position of formatted string to cursor position of unmasked string
+     */
+    fun convertPos(unmaskedLen: Int, pos: Int, isDeletion: Boolean = false): Int = when { // order of when cases is important
+        isEmpty -> pos
+        (pos < 0) -> 0
+        (pos >= unmaskPos.size) -> unmaskedLen
+        isDeletion -> min(unmaskedLen - 1, unmaskDelPos[pos])
+        else -> min(unmaskedLen, unmaskPos[pos])
+    }
 
-        if (!deletion && pos == size - 1) {
-            return lastAllowedPos - 1
-        }
-
-        val str = trimInputStr(input)
-
-        val lastStrPos = str.length - 1
-
-        var result = -1
-
-        if (lastStrPos < 0) {
-            val inputLen = min(size, pos)
-            for (i in 0..inputLen) {
-                val maskChar = maskChars[i]
-                if (maskChar !is FixedCharacter) {
-                    result++
-                }
-            }
-        } else {
-            val inputLen = min(size, pos, lastStrPos)
-            for (i in 0..inputLen) {
-                val strChar = str[i]
-                val maskChar = maskChars[i]
-                if (maskChar !is FixedCharacter && strChar != maskChar.viewChar) {
-                    result++
-                }
-                if (i == lastStrPos) {
-                    if (deletion) {
-                        if (pos > lastStrPos) {
-                            result++
-                        }
-                    } else {
-                        result++
-                    }
-                }
-            }
+    private fun buildMask(fmtString: String): List<MaskCharacter> {
+        val result = ArrayList<MaskCharacter>()
+        for (ch in fmtString.toCharArray()) {
+            result.add(fabric.buildCharacter(ch))
         }
         return result
     }
 
-    private fun trimInputStr(str: String): String {
-        val strBuilder = StringBuilder()
-        val lastPos = min(str.length, maskChars.size) - 1
-        for (i in lastPos downTo 0) {
-            val maskChar = maskChars[i]
-            val strChar = str[i]
-            if (strChar != maskChar.viewChar || maskChar is FixedCharacter) {
-                strBuilder.append(strChar)
+    private fun initValidCursorPositions(mask: List<MaskCharacter>) {
+        for (i in 0 until mask.size) {
+            if (mask[i] !is FixedCharacter) {
+                validCursorPositions.add(i)
             }
         }
-        return strBuilder.toString().reversed()
+        validCursorPositions.add(mask.size)
+        if (mask.isEmpty()) {
+            firstAllowedPosition = 0
+            lastAllowedPosition = 0
+        } else {
+            firstAllowedPosition = validCursorPositions.first()
+            lastAllowedPosition = validCursorPositions.last()
+        }
+    }
+
+    private fun initIds() {
+        initAfterOperationPos()
+        initUnmaskDelPos()
+        initUnmaskPos()
+    }
+
+    private fun initAfterOperationPos() {
+        for (k in 0..lastAllowedPosition) {
+            posAfterAdd.add(min(lastAllowedPosition, getNextAvailablePosition(k, false)))
+            posAfterDelete.add(min(lastAllowedPosition, getNextAvailablePosition(k, true)))
+        }
+    }
+
+    private fun initUnmaskDelPos() {
+        posAfterDelete.forEach {
+            unmaskDelPos.add(validCursorPositions.indexOf(it))
+        }
+    }
+
+    private fun initUnmaskPos() {
+        var i = 0
+        var prevPos = 0
+        validCursorPositions.forEach {
+            for (j in prevPos..it) {
+                unmaskPos.add(i)
+            }
+            prevPos = it + 1
+            i++
+        }
     }
 
     private fun min(vararg values: Int): Int {

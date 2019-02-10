@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         button.setOnClickListener {
-            editText.mask = if (bump) "8 (###) Y ###/##/##" else "+7(###) ###-##-##"
+            editText.mask = if (bump) "ЗЫШ###) Y ###/##/##" else "+7(###) ###-##-##"
             bump = !bump
         }
         button2.setOnClickListener {

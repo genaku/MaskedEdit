@@ -52,7 +52,7 @@ class MaskedStringHolder(fmtString: String) {
             return
         }
 
-        if (!mask.isEmpty && start >= mask.lastAllowedPos) {
+        if (!mask.isEmpty && start > mask.lastAllowedUnmaskedPos) {
             return
         }
 
@@ -75,27 +75,23 @@ class MaskedStringHolder(fmtString: String) {
     }
 
     private fun trimUnmasked() {
-        if (!mask.isEmpty && unmasked.length > mask.lastAllowedPos) {
-            unmasked = unmasked.substring(0, mask.lastAllowedPos)
+        if (!mask.isEmpty && unmasked.length > mask.lastAllowedUnmaskedPos) {
+            unmasked = unmasked.substring(0, mask.lastAllowedUnmaskedPos)
         }
     }
 
-    fun deleteChars(input: String, start: Int, end: Int) {
-        val lastInputPosition = formatted.length
-        val trimmed = input.substring(0, lastInputPosition)
-        val unmaskedStart = mask.convertPos(trimmed, start, true)
-        val unmaskedEnd = mask.convertPos(trimmed, end, true)
+    fun deleteChars(start: Int, end: Int) {
+        val unmaskedLen = unmasked.length
+        val unmaskedStart = mask.convertPos(unmaskedLen, start, true)
+        var unmaskedEnd = mask.convertPos(unmaskedLen, end, true)
+        if (unmaskedEnd == unmaskedStart) unmaskedEnd++
         deleteUnmaskedChars(unmaskedStart, unmaskedEnd)
     }
 
-    fun replaceChars(input: String, start: Int, end: Int, chars: CharSequence) {
-        val lastInputPosition = formatted.length
-        val trimmed = if (input.length >= lastInputPosition)
-            input.substring(0, lastInputPosition)
-        else
-            input
-        val unmaskedStart = mask.convertPos(trimmed, start)
-        val unmaskedEnd = mask.convertPos(trimmed, end)
+    fun replaceChars(start: Int, end: Int, chars: CharSequence) {
+        val unmaskedLen = unmasked.length
+        val unmaskedStart = mask.convertPos(unmaskedLen, start)
+        val unmaskedEnd = mask.convertPos(unmaskedLen, end)
         replaceUnmaskedChars(unmaskedStart, unmaskedEnd, chars)
     }
 }

@@ -70,21 +70,5 @@ class MaskFormatter {
             }
             return maskCharIndex
         }
-
-        @JvmStatic
-        fun buildRawString(mask: Mask, input: String): String {
-            val builder = StringBuilder()
-            val inputLen = Math.min(mask.size, input.length)
-            for (i in 0 until inputLen) {
-                val ch = input[i]
-                val character = mask[i]
-                if (mask.isValidFixedCharacter(ch, i) || ch == character.viewChar) {
-                    continue
-                }
-                builder.append(ch)
-            }
-            return builder.toString()
-        }
-
     }
 }

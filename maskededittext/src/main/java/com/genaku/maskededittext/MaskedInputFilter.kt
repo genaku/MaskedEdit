@@ -35,9 +35,9 @@ class MaskedInputFilter(
         val isDeletion = source.isEmpty()
 
         if (isDeletion) {
-            maskedStringHolder.deleteChars(dest.toString(), dstart, dend)
+            maskedStringHolder.deleteChars(dstart, dend)
         } else {
-            maskedStringHolder.replaceChars(dest.toString(), dstart, dend, source)
+            maskedStringHolder.replaceChars(dstart, dend, source)
         }
 
         val pos = maskedStringHolder.getNewPosition(dstart, isDeletion)
