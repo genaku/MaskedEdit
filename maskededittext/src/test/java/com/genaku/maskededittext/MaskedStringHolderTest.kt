@@ -1,5 +1,6 @@
 package com.genaku.maskededittext
 
+import com.genaku.maskededittext.maskcharacters.MaskCharacter
 import org.junit.Test
 import org.junit.runner.RunWith
 import pl.mareklangiewicz.uspek.USpekRunner
@@ -97,14 +98,17 @@ class MaskedStringHolderTest {
             }
         }
         "mask valid positions" o {
-            val mask = Mask("+7(###) ###-##-##")
+            val maskPositions = getMaskPositions("+7(###) ###-##-##")
             "initialized positions" o {
-                mask.validCursorPositions eqq listOf(3, 4, 5, 8, 9, 10, 12, 13, 15, 16, 17)
-                mask.unmaskPos      eqq listOf(0, 0, 0, 0, 1, 2, 3, 3, 3,  4,  5,  6,  6,  7,  8,  8,  9, 10)
-                mask.unmaskDelPos   eqq listOf(0, 0, 0, 0, 1, 2, 2, 2, 3,  4,  5,  5,  6,  7,  7,  8,  9, 10)
-                mask.posAfterAdd    eqq listOf(4, 4, 4, 4, 5, 8, 8, 8, 9, 10, 12, 12, 13, 15, 15, 16, 17, 17)
-                mask.posAfterDelete eqq listOf(3, 3, 3, 3, 4, 5, 5, 5, 8,  9, 10, 10, 12, 13, 13, 15, 16, 17)
+                maskPositions.validCursorPositions eqq listOf(3, 4, 5, 8, 9, 10, 12, 13, 15, 16, 17)
+                maskPositions.unmaskPos eqq listOf(0, 0, 0, 0, 1, 2, 3, 3, 3, 4, 5, 6, 6, 7, 8, 8, 9, 10)
+                maskPositions.unmaskDelPos eqq listOf(0, 0, 0, 0, 1, 2, 2, 2, 3, 4, 5, 5, 6, 7, 7, 8, 9, 10)
+                maskPositions.posAfterAdd eqq listOf(4, 4, 4, 4, 5, 8, 8, 8, 9, 10, 12, 12, 13, 15, 15, 16, 17, 17)
+                maskPositions.posAfterDelete eqq listOf(3, 3, 3, 3, 4, 5, 5, 5, 8, 9, 10, 10, 12, 13, 13, 15, 16, 17)
             }
+        }
+        "check mask positions" o {
+            val mask = Mask("+7(###) ###-##-##")
             "next valid after 1st pos" o {
                 mask.getNextPosition(0, false) eqq 4
             }
@@ -284,11 +288,11 @@ class MaskedStringHolderTest {
                 holder.unmasked eqq "90260"
                 holder.formatted.toString() eqq "+7(902)60"
             }
-            "insert out of field" o {
-                holder.replaceChars(20, 20, "0")
-                holder.unmasked eqq "9026"
-                holder.formatted.toString() eqq "+7(902)6"
-            }
+//            "insert out of field" o {
+//                holder.replaceChars(20, 20, "0")
+//                holder.unmasked eqq "9026"
+//                holder.formatted.toString() eqq "+7(902)6"
+//            }
         }
         "add in masked" o {
             val holder = MaskedStringHolder(TEST_MASK)
@@ -318,7 +322,8 @@ class MaskedStringHolderTest {
         "cursor positions" o {
             val mask = Mask(TEST_MASK)
             "list of positions" o {
-                mask.validCursorPositions eqq listOf(3, 4, 5, 7, 8, 9, 10)
+                val maskPositions = getMaskPositions(TEST_MASK)
+                maskPositions.validCursorPositions eqq listOf(3, 4, 5, 7, 8, 9, 10)
             }
             "find first pos" o {
                 val pos = mask.getNextPosition(0, false)
@@ -382,6 +387,15 @@ class MaskedStringHolderTest {
                 holder.formatted eqq "ЗЫШ123) Y 456/0"
             }
         }
+    }
+
+    private fun getMaskPositions(fmtString: String): MaskPositions {
+        val mask = Mask(fmtString)
+        val maskChars = ArrayList<MaskCharacter>()
+        for (i in 0 until mask.size) {
+            maskChars.add(mask[i])
+        }
+        return MaskPositions(maskChars)
     }
 
     companion object {

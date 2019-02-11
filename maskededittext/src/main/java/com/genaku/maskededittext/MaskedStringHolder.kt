@@ -21,9 +21,7 @@ class MaskedStringHolder(fmtString: String) {
         get() = MaskFormatter.formatString(mask, unmasked)
 
     val fullFormatted: CharSequence
-        get() {
-            return MaskFormatter.getFullFormatted(mask, unmasked)
-        }
+        get() = MaskFormatter.getFullFormatted(mask, unmasked)
 
     fun getNewPosition(index: Int, isDeletion: Boolean) =
             mask.getNextPosition(index, isDeletion)
